@@ -1,0 +1,191 @@
+1、switch port monitor：
+#!/bin/sh
+#echo -n "Enter Place:"
+#read host_place
+#echo -n "Enter The Host:"
+#read host
+#echo -n "Enter READCOMMUNITY:"
+#read community
+#echo -n "Enter SNMP Protocol Version:"
+#read ver
+if [ $# -eq 4 ]
+then
+export host_place=$1
+host=$2
+community=$3
+ver=$4
+name=$(echo $host | awk -F. '{print $3"-"$4}')
+ifmibs="1.3.6.1.2.1.2.2.1.8"
+snmp_cmd="/usr/bin/snmpwalk -v $ver -c $community $host"
+file=switch-$host-$(date '+%F')
+head=`perl -e 'print "#" x length($ENV{host_place})'`
+cat > $file <<EOF
+#############$head#############
+#------------$host_place------------#
+#############$head#############
+EOF
+$snmp_cmd $ifmibs | awk '/up/ {print $1}' | \
+awk -F. '{print $2}'| while read key
+do
+desc=$($snmp_cmd IF-MIB::ifAlias.$key | awk -FSTRING:\  '{print $NF}')
+if [ -z $(echo "$desc") ]
+then
+desc=$($snmp_cmd IF-MIB::ifDescr.$key | awk -FSTRING:\  '{gsub(/GigabitEthernet/,"Gi",$NF);print $NF}')
+else
+desc=$($snmp_cmd IF-MIB::ifDescr.$key | awk -FSTRING:\  '{gsub(/GigabitEthernet/,"Gi",$NF);print $NF}')_$($snmp_cmd IF-MIB::ifAlias.$key | awk -FSTRING:\  '{print $NF}')
+fi
+#if [ -n "$(echo "$desc" | grep -i link)" ]
+#then
+echo "$desc"
+cat >>$file <<EOF
+define service {
+        use                     generic-port
+        host_name               $name
+        service_description     $desc
+        check_command           check_ifoperstatus!$community!2!$key
+}
+EOF
+#fi
+done
+echo -e "\nYou can see to hosts and service file.\n"
+else
+echo "$0 <Place> <host> <community> <version>" 
+exit 0
+fi
+ 
+2、batch add host：
+#!/bin/sh
+. /etc/profile
+echo -n "Enter Place:"
+read host_place
+echo -n "Enter The Start of IP:"
+read ip_start
+echo -n "ENter The End of IP:"
+read ip_end
+name=$(echo $ip_start | awk -F. '{print $3}')
+ip_prefix=$(echo $ip_start | awk -F. '{print $1"."$2"."$3}')
+host_start=$(echo $ip_start | awk -F. '{print $4}')
+host_end=$(echo $ip_end | awk -F. '{print $4}')
+host_end=$(expr $host_end + 1 )
+cat > hosts <<EOF
+##########################################
+#------------$host_place-----------------#
+##########################################
+EOF
+cat > services <<EOF
+##########################################
+#------------$host_place-----------------#
+##########################################
+EOF
+for((i="$host_start";i-"$host_end";i++))
+do
+cat >> hosts <<EOF
+define host {
+        host_name               $name-$i
+        alias                   server $name-$i
+        address                 $ip_prefix.$i
+        contact_groups          sagroup
+        check_command           check-host-alive
+        max_check_attempts      5
+        notification_interval   10
+        notification_period     24x7
+        notification_options    d,u,r
+}
+EOF
+cat >> services <<EOF
+define service {
+        host_name               $name-$i
+        service_description     check_ssh
+        check_period            24x7
+        max_check_attempts      5
+        normal_check_interval   3
+        retry_check_interval    2
+        contact_groups          sagroup
+        notification_interval   10
+        notification_period     24x7
+        notification_options    w,u,c,r
+        check_command           check_ssh
+}
+EOF
+done
+echo -e "\nYou can see to hosts and service file.\n"
+
+3、disk monitor scripts
+#!/bin/sh
+if [ $# -ge 4 ]; then
+#. /etc/profile
+export host=$3
+community=$1
+ver=$2
+contact=$5
+name="$4"
+#name=$(echo $host | awk -F. '{print $3"-"$4}')
+ifmibs=".1.3.6.1.2.1.25.2.3.1.3"
+snmp_cmd="/usr/bin/snmpwalk -v $ver -c $community $host"
+file=$host-Disk-${name}-$(date '+%F')
+
+if [ -z "$(/bin/egrep "^${host}$" /usr/local/nagios/etc/disk.cfg)" ]
+then
+head=`perl -e 'print "#" x length($ENV{host})'`
+cat >$file<<EOF
+#############$head#############
+#------------$host------------#
+#############$head#############
+define host {
+        host_name               Disk-${name}
+        alias                   Server_${name}
+        address                 ${host}
+        contact_groups          nicsagroup
+        check_command           check-host-alive
+        max_check_attempts      3
+        check_period            24x7
+        notifications_enabled   0
+        notification_interval   10
+        notification_period     24x7
+        notification_options    d,u,r
+        }
+EOF
+$snmp_cmd $ifmibs | awk '$NF~/\// {print $NF}' | while read desc
+do
+echo $desc
+if [ "$desc" = "/var" ] || [ "$desc" = "/" ] || [ "$desc" = "/usr" ] ; then
+cat >>$file <<EOF
+define service {
+        host_name               Disk-${name}
+        service_description     ${desc}_Disk_Avail
+        check_period            24x7
+        max_check_attempts      2
+        normal_check_interval   5
+        retry_check_interval    2
+        contact_groups          nicsagroup,${contact}
+        notification_interval   60
+        notification_period     24x7
+        notification_options    c,r
+        check_command           check_disk_partition!${community}!2!$desc!90
+        }
+EOF
+else
+cat >>$file <<EOF
+define service {
+        host_name               Disk-${name}
+        service_description     ${desc}_Disk_Avail
+        check_period            24x7
+        max_check_attempts      2
+        normal_check_interval   5
+        retry_check_interval    2
+        contact_groups          sa_mail,${contact}
+        notification_interval   60
+        notification_period     24x7
+        notification_options    c,r
+        check_command           check_disk_partition!${community}!2!$desc!90
+        }
+EOF
+fi
+done
+
+echo -e "\nYou can see to $file .\n"
+fi
+else
+echo "$0 <community> <version> <host> <name> <contact>" 
+exit 0
+fi
