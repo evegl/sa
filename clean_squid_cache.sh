@@ -5,4 +5,3 @@ grep -a -r $1 $squidcache_path | strings | awk "/^http:.*\.$1/ {print}" | while 
 do
 $squidclient -m PURGE $url
 done
-[root@
