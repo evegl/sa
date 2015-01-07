@@ -1,6 +1,6 @@
 
 
-
+#em1
 #!/bin/sh
 while true
 do 
@@ -10,22 +10,51 @@ do
     do 
         echo "initail iptables, and flush exsit rules"  >> /var/log/vpn-nat.log
         /sbin/iptables -t nat -F
-        echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.150 -o em1 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log        
-        echo "$(date) sleep 10800" >> /var/log/vpn-nat.log
+        echo "$(date) /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.150 -o em1 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log        
         /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.150 -o em1 -j SNAT --to ${vip[$i]}
         i=`expr $i + 1`
-        echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.150 -o em1 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log        
-        echo "$(date) sleep 10800" >> /var/log/vpn-nat.log
+        echo "$(date) /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.151 -o em1 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log        
         /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.151 -o em1 -j SNAT --to ${vip[$i]}
         i=`expr $i + 1`
-        echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.150 -o em1 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log        
-        echo "$(date) sleep 10800" >> /var/log/vpn-nat.log
+        echo "$(date) /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.152 -o em1 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log        
         /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.152 -o em1 -j SNAT --to ${vip[$i]}
         i=`expr $i + 1`
-        echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.150 -o em1 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log        
-        echo "$(date) sleep 10800" >> /var/log/vpn-nat.log
+        echo "$(date) /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.153 -o em1 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log        
         /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.153 -o em1 -j SNAT --to ${vip[$i]}
         i=`expr $i + 1`
+        echo "$(date) sleep 10800" >> /var/log/vpn-nat.log
+        sleep 10800
+    done
+    unset vip
+done
+
+
+
+
+eth0:
+
+#!/bin/sh
+while true
+do 
+    vip=(`ip addr ls dev eth0 | awk '/inet / && /scope global secondary/ {gsub("/24","",$2);print $2}'`)
+    i=0
+    while [ $i -lt ${#vip[@]} ]
+    do 
+        echo "initail iptables, and flush exsit rules"  >> /var/log/vpn-nat.log
+        /sbin/iptables -t nat -F
+        echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.150 -o eth0 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log        
+        /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.150 -o eth0 -j SNAT --to ${vip[$i]}
+        i=`expr $i + 1`
+        echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.151 -o eth0 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log        
+        /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.151 -o eth0 -j SNAT --to ${vip[$i]}
+        i=`expr $i + 1`
+        echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.152 -o eth0 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log        
+        /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.152 -o eth0 -j SNAT --to ${vip[$i]}
+        i=`expr $i + 1`
+        echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.153 -o eth0 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log        
+        /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.153 -o eth0 -j SNAT --to ${vip[$i]}
+        i=`expr $i + 1`
+        echo "$(date) sleep 10800" >> /var/log/vpn-nat.log
         sleep 10800
     done
     unset vip
@@ -39,10 +68,7 @@ done
 
 
 
-
-
-
-cat >> /etc/logrotate.d/vpn <<EOF
+cat > /etc/logrotate.d/vpn <<EOF
 /var/log/vpn-nat.log
 {
     sharedscripts
@@ -58,7 +84,7 @@ EOF
 
 
 
-cat >> /etc/ppp/chap-secrets <<EOF
+cat > /etc/ppp/chap-secrets <<EOF
 # Secrets for authentication using CHAP
 # client                server  secret                  IP addresses
 "kzapp1"                pptpd   "kz33550123"          172.16.169.150
@@ -69,7 +95,7 @@ cat >> /etc/ppp/chap-secrets <<EOF
 EOF
 
 
-cat >> /etc/ppp/pptpd.conf <<EOF
+cat > /etc/ppp/pptpd.conf <<EOF
 ppp /usr/sbin/pppd
 option /etc/ppp/options.pptpd
 
