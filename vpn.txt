@@ -9,38 +9,36 @@ do
     while [ $i -lt ${#vip[@]} ]
     do 
         count=`expr ${#vip[@]} - $i`
-        echo "loop1:$count"
         echo "initail iptables, and flush exsit rules"  >> /var/log/vpn-nat.log
         /sbin/iptables -t nat -F
         if [ $i -gt 1 ] && [ $count -gt 4 ]
         then
-        echo "loop2:$count"
-          echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.150 -o eth0 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log
-          /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.150 -o eth0 -j SNAT --to ${vip[$i]}
+          echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.150 -o em1 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log
+          /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.150 -o em1 -j SNAT --to ${vip[$i]}
           i1=`expr $i - 1`
-          echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.151 -o eth0 -j SNAT --to ${vip[$i1]}" >> /var/log/vpn-nat.log
-          /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.151 -o eth0 -j SNAT --to ${vip[$i1]}
+          echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.151 -o em1 -j SNAT --to ${vip[$i1]}" >> /var/log/vpn-nat.log
+          /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.151 -o em1 -j SNAT --to ${vip[$i1]}
           i2=`expr $i - 2`
-          echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.152 -o eth0 -j SNAT --to ${vip[$i2]}" >> /var/log/vpn-nat.log
-          /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.152 -o eth0 -j SNAT --to ${vip[$i2]}
+          echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.152 -o em1 -j SNAT --to ${vip[$i2]}" >> /var/log/vpn-nat.log
+          /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.152 -o em1 -j SNAT --to ${vip[$i2]}
           i3=`expr $i + 1`
-          echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.153 -o eth0 -j SNAT --to ${vip[$i3]}" >> /var/log/vpn-nat.log
-          /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.153 -o eth0 -j SNAT --to ${vip[$i3]}
+          echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.153 -o em1 -j SNAT --to ${vip[$i3]}" >> /var/log/vpn-nat.log
+          /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.153 -o em1 -j SNAT --to ${vip[$i3]}
           i=`expr $i + 1`
           echo "$(date) sleep 10800" >> /var/log/vpn-nat.log
           sleep 10800
         else
-          echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.150 -o eth0 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log
-          /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.150 -o eth0 -j SNAT --to ${vip[$i]}
+          echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.150 -o em1 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log
+          /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.150 -o em1 -j SNAT --to ${vip[$i]}
           i=`expr $i + 1`
-          echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.151 -o eth0 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log
-          /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.151 -o eth0 -j SNAT --to ${vip[$i]}
+          echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.151 -o em1 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log
+          /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.151 -o em1 -j SNAT --to ${vip[$i]}
           i=`expr $i + 1`
-          echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.152 -o eth0 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log
-          /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.152 -o eth0 -j SNAT --to ${vip[$i]}
+          echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.152 -o em1 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log
+          /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.152 -o em1 -j SNAT --to ${vip[$i]}
           i=`expr $i + 1`
-          echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.153 -o eth0 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log
-          /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.153 -o eth0 -j SNAT --to ${vip[$i]}
+          echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.153 -o em1 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log
+          /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.153 -o em1 -j SNAT --to ${vip[$i]}
           i=`expr $i + 1`
           echo "$(date) sleep 10800" >> /var/log/vpn-nat.log
           sleep 10800
@@ -62,12 +60,10 @@ do
     while [ $i -lt ${#vip[@]} ]
     do 
         count=`expr ${#vip[@]} - $i`
-        echo "loop1:$count"
         echo "initail iptables, and flush exsit rules"  >> /var/log/vpn-nat.log
         /sbin/iptables -t nat -F
         if [ $i -gt 1 ] && [ $count -gt 4 ]
         then
-        echo "loop2:$count"
           echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.150 -o eth0 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log
           /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.150 -o eth0 -j SNAT --to ${vip[$i]}
           i1=`expr $i - 1`
