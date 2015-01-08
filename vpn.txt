@@ -28,8 +28,7 @@ do
           /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.153 -o eth0 -j SNAT --to ${vip[$i3]}
           i=`expr $i + 1`
           echo "$(date) sleep 10800" >> /var/log/vpn-nat.log
-          sleep 3
-          #sleep 10800
+          sleep 10800
         else
           echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.150 -o eth0 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log
           /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.150 -o eth0 -j SNAT --to ${vip[$i]}
@@ -44,8 +43,7 @@ do
           /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.153 -o eth0 -j SNAT --to ${vip[$i]}
           i=`expr $i + 1`
           echo "$(date) sleep 10800" >> /var/log/vpn-nat.log
-          sleep 3
-          #sleep 10800
+          sleep 10800
         fi
     done
     unset vip
@@ -83,8 +81,7 @@ do
           /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.153 -o eth0 -j SNAT --to ${vip[$i3]}
           i=`expr $i + 1`
           echo "$(date) sleep 10800" >> /var/log/vpn-nat.log
-          sleep 3
-          #sleep 10800
+          sleep 10800
         else
           echo "$(date) /sbin/iptables -t nat -A POSTROUTING 1 -s 172.16.169.150 -o eth0 -j SNAT --to ${vip[$i]}" >> /var/log/vpn-nat.log
           /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.150 -o eth0 -j SNAT --to ${vip[$i]}
@@ -99,8 +96,7 @@ do
           /sbin/iptables -t nat -A POSTROUTING -s 172.16.169.153 -o eth0 -j SNAT --to ${vip[$i]}
           i=`expr $i + 1`
           echo "$(date) sleep 10800" >> /var/log/vpn-nat.log
-          sleep 3
-          #sleep 10800
+          sleep 10800
         fi
     done
     unset vip
